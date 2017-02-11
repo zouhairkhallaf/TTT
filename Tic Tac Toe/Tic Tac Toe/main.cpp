@@ -66,7 +66,7 @@ int main(int argc, const char * argv[]) {
         wanToPlayMore(wantToPlay);
     }
     goodByMessage();
-
+    
     return 0;
 }
 
@@ -98,8 +98,8 @@ void playComputer(char* board, const int rows, const int columns, string compute
     //Store empty positions indices from the board into the Arr[C]
     for (int i=0, j=0; i<boardSize; i++) {
         if (board[i] == '\0'){
-                Arr[j] = i;
-                j++;
+            Arr[j] = i;
+            j++;
         }
     }
     //Generate a random number named r = rand()% C
@@ -163,39 +163,39 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
 
 
 /*
-//We check if Player is winner if completed a row || Column || Diagonal (if any)
-bool isPlayerWinner(char* arr, int Row, int Column, string playerNumber){
-    //return (completedRow(arr)||completedColumn(arr)||completedDiagonal(arr));
-    if (completedRow(arr,Row,Column)){
-        cout << "\t\t\t\t> Row "   << Row    << " completed " << endl;
-        return true;
-    }
-    if (completedColumn(arr,Row,Column)){
-        cout << "\t\t\t\t> Column "<< Column << " completed " << endl;
-        return true;
-    }
-    if (completedDiagonal()){
-        cout << "\t\t\t\t> Diagonal completed " << endl;
-        return true;
-    }
-    
-    return false;
-}
-bool completedRow(string* arr, int Row, int Column){
-    for (int i=1; i<=Row; i++) { //i is the ith Row example (first Row, Second, Third ....)
-        int index=getStartingIndexOfRow(Row,Column,i);
-        string prev = arr[index];
-        for (int j=index, i=0; i<Column; j++, i++) {
-            if(prev != arr[j]){
-                break;
-            }else{
-                return true; // wins a row;
-            }
-        }
-    }
-    return false;
-}
-*/
+ //We check if Player is winner if completed a row || Column || Diagonal (if any)
+ bool isPlayerWinner(char* arr, int Row, int Column, string playerNumber){
+ //return (completedRow(arr)||completedColumn(arr)||completedDiagonal(arr));
+ if (completedRow(arr,Row,Column)){
+ cout << "\t\t\t\t> Row "   << Row    << " completed " << endl;
+ return true;
+ }
+ if (completedColumn(arr,Row,Column)){
+ cout << "\t\t\t\t> Column "<< Column << " completed " << endl;
+ return true;
+ }
+ if (completedDiagonal()){
+ cout << "\t\t\t\t> Diagonal completed " << endl;
+ return true;
+ }
+ 
+ return false;
+ }
+ bool completedRow(string* arr, int Row, int Column){
+ for (int i=1; i<=Row; i++) { //i is the ith Row example (first Row, Second, Third ....)
+ int index=getStartingIndexOfRow(Row,Column,i);
+ string prev = arr[index];
+ for (int j=index, i=0; i<Column; j++, i++) {
+ if(prev != arr[j]){
+ break;
+ }else{
+ return true; // wins a row;
+ }
+ }
+ }
+ return false;
+ }
+ */
 
 
 //Simple Welcome message
@@ -233,7 +233,7 @@ void setGameVariables(string& userSymbol, string& computerSymbol, string& player
     if(userSymbol == "1"){
         computerSymbol = "2";
     }else if(userSymbol == "2"){
-       computerSymbol = "1";
+        computerSymbol = "1";
     }else{
         cout << "INVELID SYMBOL" <<endl;
     }
@@ -255,7 +255,7 @@ void fillBoard(char* arr, const int Row, const int Column){
         arr[i] = '0'; // ASCII code for white space
     }
 }
- 
+
 //Displays an Array based on the specified Rows and Columns
 void displayBoard(char* arr, const int Row, const int Column){
     for (int i=0, c=1 ; i<Row*Column; i++, c++) {
@@ -285,7 +285,7 @@ void displayIthRow(char* arr, const int Row, const int Column, const int ithRow)
     cout << "ROW " << ithRow << " : ";
     int index=getStartingIndexOfRow(Row,Column,ithRow);
     for (int j=index, i=0; i<Column; j++, i++) {
-            cout << " "<< arr[j] << "";
+        cout << " "<< arr[j] << "";
     }
     cout<<endl;
 }
@@ -324,27 +324,27 @@ void displayAllColumnIndices(char* arr, const int Row, const int Column){
     }
 }
 /*
-How to get the array of diagonal: THERE IS A PATTERN
-First the Matrix needs to be N x N Matrix
+ How to get the array of diagonal: THERE IS A PATTERN
+ First the Matrix needs to be N x N Matrix
  
-0 1             00      ,    03                                 |   01      ,       02                                          c=2
-2 3             0*(c+1) ,   1(c+1)                              |   1*(c-1) ,    2*(c-1)
-
-0 1 2           00      ,    04     ,   08                      |  02       ,       04      ,       06                          c=3
-3 4 5           0*4     ,   1*4     ,  2*4                      | 1*2       ,       2*2     ,       3*2
-6 7 8           0*(c+1) , 1*(c+1)   , 2*(c+1)                   | 1*(c-1)   ,      2*(c-1)  ,       3*(c-1)
-
+ 0 1             00      ,    03                                 |   01      ,       02                                          c=2
+ 2 3             0*(c+1) ,   1(c+1)                              |   1*(c-1) ,    2*(c-1)
+ 
+ 0 1 2           00      ,    04     ,   08                      |  02       ,       04      ,       06                          c=3
+ 3 4 5           0*4     ,   1*4     ,  2*4                      | 1*2       ,       2*2     ,       3*2
+ 6 7 8           0*(c+1) , 1*(c+1)   , 2*(c+1)                   | 1*(c-1)   ,      2*(c-1)  ,       3*(c-1)
+ 
  0  1  2  3     00      ,   05      ,   10      ,   15          |   3       ,       6       ,         9       ,     12          c=4
  4  5  6  7     0*(c+1) , 1*(c+1)   , 2*(c+1)   ,   3*(c+1)     | 1*(c-1)   ,      2*(c-1)  ,       3*(c-1)   ,     4*(c-1)
  8  9 10 11
-12 13 14 15
-
-00 01 02 03 04  00,06,12,18,24  | 04,08,12,16,20   5
-05 06 07 08 09
-10 11 12 13 14  0*(c+1),1*(c+1),2*(c+1),3*(c+1),4*(c+1) | 1*(c-1),2*(c-1),3*(c-1),4*(c-1),5*(c-1)   => TRUE
-15 16 17 18 19
-20 21 22 23 24
-*/
+ 12 13 14 15
+ 
+ 00 01 02 03 04  00,06,12,18,24  | 04,08,12,16,20   5
+ 05 06 07 08 09
+ 10 11 12 13 14  0*(c+1),1*(c+1),2*(c+1),3*(c+1),4*(c+1) | 1*(c-1),2*(c-1),3*(c-1),4*(c-1),5*(c-1)   => TRUE
+ 15 16 17 18 19
+ 20 21 22 23 24
+ */
 bool MatrixIsnByn(const int Row, const int Column){
     return (Row==Column);
 }

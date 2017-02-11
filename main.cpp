@@ -1,4 +1,4 @@
-//
+// zouhair
 //  main.cpp
 //  A playful program using a linear array to represent a 2D matrix and has useful simple applications on rows and colums traversals
 //

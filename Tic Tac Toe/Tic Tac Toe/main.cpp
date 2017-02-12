@@ -1,4 +1,4 @@
-// zouhair khallaf
+//  Debugging
 //  main.cpp
 //  A playful program using a linear array to represent a 2D matrix and has useful simple applications on rows and colums traversals
 //
@@ -43,7 +43,7 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
 //----------------UTILITIES------------------------------------------------------------------
 int howManyEmptySpotsInBoard(char* board, const int boardSize);
 void drawLine(int N);
-
+bool boardIsFull(char*board, const int rows, const int columns);
 bool completedRow(char* arr, int Row, int Column, string player);
 bool completedColumn(char* arr, int Row, int Column, string player);
 bool completedDiagonal(char* arr, int Row, int Column, string player);
@@ -52,30 +52,24 @@ bool completedDiagonal(char* arr, int Row, int Column, string player);
 
 
 int main(int argc, const char * argv[]) {
-    srand (time(NULL) );
-    string userSymbol,computerSymbol,playerTurn;
-    char* board;
-    bool gameOn = true, wantToPlay=true;
-    int rows=0, columns=0;
-    
+    bool wantToPlay=true;
     welcomeMessage();
     while(wantToPlay){
+        srand (time(NULL) );
+        string userSymbol,computerSymbol,playerTurn;
+        char* board;
+        bool gameOn = true;
+        int rows=0, columns=0;
         createGameBoard(board, rows, columns);
         setGameVariables(userSymbol,computerSymbol,playerTurn,rows,columns);
-        for (int i=0; i<rows*columns; i++) {
+        for (int i=0; i<rows*columns; i++)
             cout << board[i] <<" ";
-        }
         cout << "\t GAME ON " <<endl<<endl;
         while(gameOn){
             playGame(board, rows, columns, gameOn,userSymbol,computerSymbol, playerTurn);
             displayBoard(board, rows, columns);
-            
-            if(isPlayerWinner(board, rows, columns,playerTurn)){
-                
-                
-                
+            if(isPlayerWinner(board, rows, columns,playerTurn) || boardIsFull(board, rows, columns))
                 gameOn = false;
-            }
         }
         cout << "\t GAME OVER " <<endl<<endl;
         wanToPlayMore(wantToPlay);
@@ -87,6 +81,18 @@ int main(int argc, const char * argv[]) {
 
 
 //----------------------------------------------------------------------------------------FUNCTIONS (needs house keeping)
+
+bool boardIsFull(char*board, const int rows, const int columns){
+    bool tied_game = true;
+    int board_size = rows*columns;
+    for (int i=0; i<board_size; i++) {
+        if(board[i] == '\0'){
+            return false;
+        }
+    }
+    cout << " GAME TIED , No winners ... " <<endl;
+    return tied_game;
+}
 
 
 //Assuming playerTurn has been verified before.
@@ -137,7 +143,6 @@ int howManyEmptySpotsInBoard(char* board, const int boardSize){
     return c;
 }
 
-
 void playUser(char* board, const int rows, const int columns, string userSymbol){
     int boardSize = rows*columns;
     bool  badindex = true;
@@ -174,10 +179,7 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
     }while (badindex);
     //Make this move by board[index] = symbol.
     board[index] = userSymbol[0]; //Since we are storing one character instead of a string.
-
 }
-
-
 
  //We check if Player is winner if completed a row || Column || Diagonal (if any)
  bool isPlayerWinner(char* arr, int Row, int Column, string playerTurn){
@@ -191,7 +193,7 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
          return true;
      }else if (completedColumn(arr,Row,Column,player)){
          return true;
-     }else if ( Row == Column && completedDiagonal(arr,Row,Column,player)){
+     }else if (completedDiagonal(arr,Row,Column,player)){
          return true;
      }else{
          return false;
@@ -202,11 +204,11 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
      for (int i=1; i<=Row; i++) { //i is the ith Row example (first Row, Second, Third ....)
          int index=getStartingIndexOfRow(Row,Column,i);
          char prev = arr[index];
-         for (int j=index+1, i=0; i<Column; j++, i++) {
+         for (int j=index+1, i=0; i<Column; j++, i++) { // the i makes sure this loop runs Column times starting from 0.
              if(prev == '\0' || prev != arr[j]){
                  break;
-             }else{
-                 cout << "ROW Number : " << i << "completed by player "<< player <<endl;
+             }else if (i==Column){
+                 cout << "ROW Number : " << index << "completed by player "<< player <<endl;
                  return true; // wins a row;
              }
          }
@@ -216,9 +218,10 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
 
 
 bool completedColumn(char* arr, int Row, int Column, string player){
+
     for (int j=0; j<Column; j++) {
         char prev = arr[j];
-        for (int i=0; i<Row; i++) {
+        for (int i=1; i<Row; i++) {
             if(arr[(i*Column)+j] == '\0' || arr[(i*Column)+j] != prev){
                 break; //  the inner loope
             }
@@ -239,7 +242,7 @@ bool completedDiagonal(char* arr, int Row, int Column, string player){
         
         char TopLeft_prev = arr[0];
         for(int i=1; i<c; i++){      //first Diagonal
-            if(arr[i*(c+1)] != TopLeft_prev){
+            if(TopLeft_prev != '\0' && arr[i*(c+1)] != TopLeft_prev){
                 break;
             }
             if(i==c){
@@ -250,9 +253,10 @@ bool completedDiagonal(char* arr, int Row, int Column, string player){
         
         char TopRight_prev = arr[c-1];
         for (int i=2; i<=c; i++){    //Second Diagonal
-            if(arr[i*(c-1)]!=TopRight_prev){
+            if(TopRight_prev != '\0' && arr[i*(c-1)]!=TopRight_prev){
                 break;
-            }else if(i==c){
+            }
+            if(i==c){
                 cout <<"Second Diagonal completed by player "<< player <<endl;
                 return true;
             }
@@ -275,9 +279,10 @@ void goodByMessage(){
 }
 void wanToPlayMore(bool& wantToPlay){
     string input;
-    cout << "IF you want to continue playing enter YES/NO: ";
-    getline(cin,input);
-    if (input == "YES") {
+    cout << "IF you want to continue playing enter Y/N: ";
+    cin  >> input;
+    cout << endl;
+    if (input == "Y") {
         wantToPlay = true;
     }else{
         wantToPlay = false;

@@ -12,6 +12,8 @@
 #include <time.h>       /* time */
 #include <math.h>
 #include <vector>
+#include<iomanip>
+
 
 
 using namespace std;
@@ -28,7 +30,9 @@ void getFirstColumnIndices(char* arr, const int Row, const int Column);
 void displayAllColumnIndices(char* arr, const int Row, const int Column);
 bool MatrixIsnByn(const int Row, const int Column);
 void displayAllDiagonals(char* arr, const int Row, const int Column);
-bool isPlayerWinner(char* arr, int Row, int Column, string playerNumber);
+
+bool isPlayerWinner(char* arr, int Row, int Column, string playerTurn);
+
 bool completedRow(char* arr, int Row, int Column, int playerNumber);
 bool validMove(char* arr, string input, string symbol);
 void goodByMessage();
@@ -38,10 +42,11 @@ void playComputer(char* board, const int rows, const int columns, string compute
 void playUser(char* board, const int rows, const int columns, string userSymbol);
 //----------------UTILITIES------------------------------------------------------------------
 int howManyEmptySpotsInBoard(char* board, const int boardSize);
+void drawLine(int N);
 
-
-
-
+bool completedRow(char* arr, int Row, int Column, string player);
+bool completedColumn(char* arr, int Row, int Column, string player);
+bool completedDiagonal(char* arr, int Row, int Column, string player);
 //----------------------------------------------------------------------------------------MAIN()
 
 
@@ -57,10 +62,20 @@ int main(int argc, const char * argv[]) {
     while(wantToPlay){
         createGameBoard(board, rows, columns);
         setGameVariables(userSymbol,computerSymbol,playerTurn,rows,columns);
+        for (int i=0; i<rows*columns; i++) {
+            cout << board[i] <<" ";
+        }
         cout << "\t GAME ON " <<endl<<endl;
         while(gameOn){
             playGame(board, rows, columns, gameOn,userSymbol,computerSymbol, playerTurn);
             displayBoard(board, rows, columns);
+            
+            if(isPlayerWinner(board, rows, columns,playerTurn)){
+                
+                
+                
+                gameOn = false;
+            }
         }
         cout << "\t GAME OVER " <<endl<<endl;
         wanToPlayMore(wantToPlay);
@@ -89,7 +104,7 @@ void playGame(char* board, const int rows, const int columns, bool& gameOn, stri
 //Picks a random index from those who are empty in the string and places it's simbol
 
 void playComputer(char* board, const int rows, const int columns, string computerSymbol){
-    cout << "\t\t\t .My Turn" <<endl;
+    cout << "\t\t\t .I played, your turn ..." <<endl;
     int boardSize = rows*columns;
     //Count the empty positions in the board and store it in C
     int C = howManyEmptySpotsInBoard(board,boardSize);
@@ -97,7 +112,7 @@ void playComputer(char* board, const int rows, const int columns, string compute
     int* Arr = new int[C];
     //Store empty positions indices from the board into the Arr[C]
     for (int i=0, j=0; i<boardSize; i++) {
-        if (board[i] == '\0'){
+        if (board[i] != 'X' && board[i] != 'O'){
             Arr[j] = i;
             j++;
         }
@@ -116,7 +131,7 @@ void playComputer(char* board, const int rows, const int columns, string compute
 int howManyEmptySpotsInBoard(char* board, const int boardSize){
     int c = 0;
     for (int i=0; i<boardSize; i++) {
-        if (board[i]=='\0')
+        if (board[i]!='X' && board[i]!='O')
             c++;
     }
     return c;
@@ -124,15 +139,15 @@ int howManyEmptySpotsInBoard(char* board, const int boardSize){
 
 
 void playUser(char* board, const int rows, const int columns, string userSymbol){
-    cout << "\t\t\t .Your Turn" <<endl;
     int boardSize = rows*columns;
     bool  badindex = true;
     int input;
+    int index;
     do {
         //Get the user input
         cout << "\t\t>Pick a position 1-" << boardSize << ": ";
         cin >> input;
-        int index = input - 1;
+        index = (int)input - 1;
         if(index<0 || index>=boardSize){ // Checks if input is out of range
             continue;
         }else{
@@ -142,7 +157,7 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
             int* Arr = new int[C];
             //Store empty positions indices from the board into the Arr[C]
             for (int i=0, j=0; i<boardSize; i++) {
-                if (board[i] == '\0'){
+                if (board[i]!='X' && board[i]!='O'){
                     Arr[j] = i;
                     j++;
                 }
@@ -158,44 +173,96 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
         }
     }while (badindex);
     //Make this move by board[index] = symbol.
-    board[(int)index] = userSymbol[0]; //Since we are storing one character instead of a string.
+    board[index] = userSymbol[0]; //Since we are storing one character instead of a string.
+
 }
 
 
-/*
+
  //We check if Player is winner if completed a row || Column || Diagonal (if any)
- bool isPlayerWinner(char* arr, int Row, int Column, string playerNumber){
- //return (completedRow(arr)||completedColumn(arr)||completedDiagonal(arr));
- if (completedRow(arr,Row,Column)){
- cout << "\t\t\t\t> Row "   << Row    << " completed " << endl;
- return true;
+ bool isPlayerWinner(char* arr, int Row, int Column, string playerTurn){
+     string player;
+     if (playerTurn == "Y") {
+         player = "YOU";
+     }else{
+         player = "THE COMPUTER";
+     }
+     if (completedRow(arr,Row,Column,player)){
+         return true;
+     }else if (completedColumn(arr,Row,Column,player)){
+         return true;
+     }else if ( Row == Column && completedDiagonal(arr,Row,Column,player)){
+         return true;
+     }else{
+         return false;
+     }
  }
- if (completedColumn(arr,Row,Column)){
- cout << "\t\t\t\t> Column "<< Column << " completed " << endl;
- return true;
+
+ bool completedRow(char* arr, int Row, int Column, string player){
+     for (int i=1; i<=Row; i++) { //i is the ith Row example (first Row, Second, Third ....)
+         int index=getStartingIndexOfRow(Row,Column,i);
+         char prev = arr[index];
+         for (int j=index+1, i=0; i<Column; j++, i++) {
+             if(prev == '\0' || prev != arr[j]){
+                 break;
+             }else{
+                 cout << "ROW Number : " << i << "completed by player "<< player <<endl;
+                 return true; // wins a row;
+             }
+         }
+     }
+     return false;
  }
- if (completedDiagonal()){
- cout << "\t\t\t\t> Diagonal completed " << endl;
- return true;
- }
- 
- return false;
- }
- bool completedRow(string* arr, int Row, int Column){
- for (int i=1; i<=Row; i++) { //i is the ith Row example (first Row, Second, Third ....)
- int index=getStartingIndexOfRow(Row,Column,i);
- string prev = arr[index];
- for (int j=index, i=0; i<Column; j++, i++) {
- if(prev != arr[j]){
- break;
- }else{
- return true; // wins a row;
- }
- }
- }
- return false;
- }
- */
+
+
+bool completedColumn(char* arr, int Row, int Column, string player){
+    for (int j=0; j<Column; j++) {
+        char prev = arr[j];
+        for (int i=0; i<Row; i++) {
+            if(arr[(i*Column)+j] == '\0' || arr[(i*Column)+j] != prev){
+                break; //  the inner loope
+            }
+            if(i==Row){
+                //winner column
+                cout << "COLUMN number :" << j+1 << " : completed by "<< player << endl;
+                return true;
+            }
+        }
+        //if loop reached this point it
+    }
+    return false;
+}
+
+bool completedDiagonal(char* arr, int Row, int Column, string player){
+    if (MatrixIsnByn(Row, Column)) {
+        int c = Row; // c = Row = Column
+        
+        char TopLeft_prev = arr[0];
+        for(int i=1; i<c; i++){      //first Diagonal
+            if(arr[i*(c+1)] != TopLeft_prev){
+                break;
+            }
+            if(i==c){
+                cout <<"First Diagonal completed by player "<< player <<endl;
+                return true;
+            }
+        }
+        
+        char TopRight_prev = arr[c-1];
+        for (int i=2; i<=c; i++){    //Second Diagonal
+            if(arr[i*(c-1)]!=TopRight_prev){
+                break;
+            }else if(i==c){
+                cout <<"Second Diagonal completed by player "<< player <<endl;
+                return true;
+            }
+        }
+    }else{
+        cout << "No Diagonals possible" <<endl;
+        return false;
+    }
+    return false;
+}
 
 
 //Simple Welcome message
@@ -224,16 +291,16 @@ void setGameVariables(string& userSymbol, string& computerSymbol, string& player
     cout << "\t\t\t> Enter Colums: ";
     cin >> Column;
     cout <<endl;
-    cout << "\t\t\t> Pick a Symbol '1' or '2' : ";
+    cout << "\t\t\t> Pick a Symbol 'X' or 'O' : ";
     cin >> userSymbol;
     cout << "\t\t\t> Who starts 'I' or 'Y': ";
     cin >> player;
     cout << "\t\t\t> Pick a number from 1 to "<< Row*Column << ":" << endl;
     cout <<endl;
-    if(userSymbol == "1"){
-        computerSymbol = "2";
-    }else if(userSymbol == "2"){
-        computerSymbol = "1";
+    if(userSymbol == "X"){
+        computerSymbol = "O";
+    }else if(userSymbol == "O"){
+        computerSymbol = "X";
     }else{
         cout << "INVELID SYMBOL" <<endl;
     }
@@ -252,22 +319,39 @@ void fillBoard(char* arr, const int Row, const int Column){
     for (int i=0; i< Row*Column; i++) {
         //arr[i] = rand()%10;
         //arr[i] = round((double) rand() / (RAND_MAX));
-        arr[i] = '0'; // ASCII code for white space
+        arr[i] = i+1; // ASCII code for white space
     }
 }
 
 //Displays an Array based on the specified Rows and Columns
 void displayBoard(char* arr, const int Row, const int Column){
-    for (int i=0, c=1 ; i<Row*Column; i++, c++) {
-        cout<<"  " << arr[i]<< "  ";
-        if ( c % Column == 0 ) {
-            cout<<endl;
-            cout<<"  ---------"<<endl;
-        }else{
-            cout<< " | ";
+    int boardSize = Row*Column;
+    for (int i=0; i<boardSize; i++){
+        if (i==0 || i%Column == 0) {
+            drawLine(Column);
+            cout <<"\t\t\t|";
         }
+        cout << setw(2);
+        if (arr[i]=='\0') {
+            cout << "   ";
+        }else{
+            cout <<arr[i]<<setw(2);
+        }
+        cout << "|";
     }
+    drawLine(Column);
+    cout <<endl<<endl;
 }
+
+void drawLine(int N){
+    cout<<endl;
+    cout << "\t\t\t";
+    for (int i=0; i<N; i++) {
+        cout << " ---";
+    }
+    cout<<endl;
+}
+
 
 //Returns the starting index of the ith Row (think of a 2D table with Rows and Columns) but stored in a linear array.
 //Returns -1 if failed

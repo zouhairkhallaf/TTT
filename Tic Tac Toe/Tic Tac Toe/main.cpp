@@ -1,4 +1,4 @@
-//  Debugging
+//  Debugging Rows 0 0 0 doesn't win.
 //  main.cpp
 //  A playful program using a linear array to represent a 2D matrix and has useful simple applications on rows and colums traversals
 //
@@ -68,7 +68,7 @@ int main(int argc, const char * argv[]) {
         while(gameOn){
             playGame(board, rows, columns, gameOn,userSymbol,computerSymbol, playerTurn);
             displayBoard(board, rows, columns);
-            if(isPlayerWinner(board, rows, columns,playerTurn) || boardIsFull(board, rows, columns))
+            if(isPlayerWinner(board, rows, columns,playerTurn))
                 gameOn = false;
         }
         cout << "\t GAME OVER " <<endl<<endl;
@@ -152,7 +152,7 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
         //Get the user input
         cout << "\t\t>Pick a position 1-" << boardSize << ": ";
         cin >> input;
-        index = (int)input - 1;
+        index = input - 1;
         if(index<0 || index>=boardSize){ // Checks if input is out of range
             continue;
         }else{
@@ -195,6 +195,8 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
          return true;
      }else if (completedDiagonal(arr,Row,Column,player)){
          return true;
+     }else if(boardIsFull(arr, Row, Column)){
+         return true;
      }else{
          return false;
      }
@@ -207,7 +209,8 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
          for (int j=index+1, i=0; i<Column; j++, i++) { // the i makes sure this loop runs Column times starting from 0.
              if(prev == '\0' || prev != arr[j]){
                  break;
-             }else if (i==Column){
+             }
+             if (i==Column-1){
                  cout << "ROW Number : " << index << "completed by player "<< player <<endl;
                  return true; // wins a row;
              }
@@ -218,14 +221,13 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
 
 
 bool completedColumn(char* arr, int Row, int Column, string player){
-
     for (int j=0; j<Column; j++) {
         char prev = arr[j];
         for (int i=1; i<Row; i++) {
             if(arr[(i*Column)+j] == '\0' || arr[(i*Column)+j] != prev){
                 break; //  the inner loope
             }
-            if(i==Row){
+            if(i==Row-1){
                 //winner column
                 cout << "COLUMN number :" << j+1 << " : completed by "<< player << endl;
                 return true;
@@ -242,10 +244,10 @@ bool completedDiagonal(char* arr, int Row, int Column, string player){
         
         char TopLeft_prev = arr[0];
         for(int i=1; i<c; i++){      //first Diagonal
-            if(TopLeft_prev != '\0' && arr[i*(c+1)] != TopLeft_prev){
+            if(TopLeft_prev == '\0' || arr[i*(c+1)] != TopLeft_prev){
                 break;
             }
-            if(i==c){
+            if(i==c-1){
                 cout <<"First Diagonal completed by player "<< player <<endl;
                 return true;
             }
@@ -253,7 +255,7 @@ bool completedDiagonal(char* arr, int Row, int Column, string player){
         
         char TopRight_prev = arr[c-1];
         for (int i=2; i<=c; i++){    //Second Diagonal
-            if(TopRight_prev != '\0' && arr[i*(c-1)]!=TopRight_prev){
+            if(TopRight_prev == '\0' || arr[i*(c-1)]!=TopRight_prev){
                 break;
             }
             if(i==c){
@@ -262,8 +264,7 @@ bool completedDiagonal(char* arr, int Row, int Column, string player){
             }
         }
     }else{
-        cout << "No Diagonals possible" <<endl;
-        return false;
+        cout << "ERROR : No Diagonals possible" <<endl;
     }
     return false;
 }

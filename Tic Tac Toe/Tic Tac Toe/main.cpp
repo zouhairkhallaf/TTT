@@ -47,6 +47,7 @@ bool boardIsFull(char*board, const int rows, const int columns);
 bool completedRow(char* arr, int Row, int Column, string player);
 bool completedColumn(char* arr, int Row, int Column, string player);
 bool completedDiagonal(char* arr, int Row, int Column, string player);
+bool validInteger(int& i);
 //----------------------------------------------------------------------------------------MAIN()
 
 
@@ -55,13 +56,15 @@ int main(int argc, const char * argv[]) {
     bool wantToPlay=true;
     welcomeMessage();
     while(wantToPlay){
+        //These variables need to be updated every time a new game starts.
         srand (time(NULL) );
         string userSymbol,computerSymbol,playerTurn;
         char* board;
         bool gameOn = true;
         int rows=0, columns=0;
-        createGameBoard(board, rows, columns);
+        
         setGameVariables(userSymbol,computerSymbol,playerTurn,rows,columns);
+        createGameBoard(board, rows, columns);
         for (int i=0; i<rows*columns; i++)
             cout << board[i] <<" ";
         cout << "\t GAME ON " <<endl<<endl;
@@ -291,25 +294,39 @@ void wanToPlayMore(bool& wantToPlay){
 }
 
 void setGameVariables(string& userSymbol, string& computerSymbol, string& player , int& Row, int& Column){
+    int input;
     cout << "Please Choose the size of your board : "<<endl;
-    cout << "\t\t\t> Enter Row: ";
-    cin >> Row;
-    cout << "\t\t\t> Enter Colums: ";
-    cin >> Column;
+    //Validating the numbers of rows.
+    do{
+        cout << "\t\t\t> Enter Row: ";
+    }while( ! (validInteger(input) && (2<=input&&input<=20)) );
+    Row = input;
+    //Validating the numbers of columns.
+    do{
+        cout << "\t\t\t> Enter Colums: ";
+    }while( ! (validInteger(input) && (2<=input&&input<=20)) );
+    Column = input;
     cout <<endl;
-    cout << "\t\t\t> Pick a Symbol 'X' or 'O' : ";
-    cin >> userSymbol;
-    cout << "\t\t\t> Who starts 'I' or 'Y': ";
-    cin >> player;
-    cout << "\t\t\t> Pick a number from 1 to "<< Row*Column << ":" << endl;
-    cout <<endl;
+    //Validating the symbol.
+    do{
+        cout << "\t\t\t> Pick a Symbol 'X' or 'O' : ";
+        cin >> userSymbol;
+        
+    }while(  !( userSymbol == "X" || userSymbol == "O") );
+    //Setting up the other player's symbol.
     if(userSymbol == "X"){
         computerSymbol = "O";
     }else if(userSymbol == "O"){
         computerSymbol = "X";
-    }else{
-        cout << "INVELID SYMBOL" <<endl;
     }
+    //Validating the player to start the game.
+    do{
+        cout << "\t\t\t> Who starts 'I' or 'Y': ";
+        cin >> player;
+    }while(  !( player == "Y" || player == "I") );
+    //Asking user to make a move.
+    cout << "\t\t\t> Pick a number from 1 to "<< Row*Column << ":" << endl;
+    cout <<endl;
 }
 
 
@@ -451,6 +468,19 @@ void displayAllDiagonals(char* arr, const int Row, const int Column){
         cout<<endl;
     }else{
         cout << "No Diagonals possible" <<endl;
+    }
+}
+
+
+bool validInteger(int& i){
+    string input;
+    getline(cin,input);                                             //Get the input as a string
+    input.erase(remove(input.begin(),input.end(),' '),input.end()); //Remove white space from front and end
+    if(isdigit(input[0])){
+        i = stoi(input);
+        return true;
+    }else{
+        return false;
     }
 }
 

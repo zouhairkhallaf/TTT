@@ -1,5 +1,4 @@
-# TTT
-Tic Tac Toe
+# TTT (Tic Tac Toe)
 
 This is an implementation of the TTT game using only ONE array as the data structure.
 

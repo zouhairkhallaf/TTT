@@ -14,53 +14,47 @@
 #include <vector>
 #include<iomanip>
 
-
-
 using namespace std;
 
-void welcomeMessage();
+
+
+
 void setGameVariables(string& userSymbol, string& computerSymbol, string& player , int& Row, int&Column);
 void createGameBoard(char* & board, const int Row, const int Column);
-void fillBoard(char* arr, const int Row, const int Column);
 void displayBoard(char* board, const int Row, const int Column);
-int getStartingIndexOfRow(const int Row, const int Column, const int ithRow);
-void displayIthRow(char* arr, const int Row, const int Column, const int ithRow);
-void displayAllRow(char* arr, const int Row, const int Column);
-void getFirstColumnIndices(char* arr, const int Row, const int Column);
-void displayAllColumnIndices(char* arr, const int Row, const int Column);
-bool MatrixIsnByn(const int Row, const int Column);
-void displayAllDiagonals(char* arr, const int Row, const int Column);
-
-bool isPlayerWinner(char* arr, int Row, int Column, string playerTurn);
-
-bool completedRow(char* arr, int Row, int Column, int playerNumber);
-bool validMove(char* arr, string input, string symbol);
-void goodByMessage();
-void wanToPlayMore(bool& wantToPlay);
 void playGame(char* board, const int rows, const int columns, bool& gameOn, string userSymbol,string computerSymbol, string& playerTurn);
+bool isPlayerWinner(char* arr, int Row, int Column, string playerTurn);
+void wanToPlayMore(bool& wantToPlay);
+// Helper functions
+void fillBoard(char* arr, const int Row, const int Column);
+int  getStartingIndexOfRow(const int Row, const int Column, const int ithRow);
+void getFirstColumnIndices(char* arr, const int Row, const int Column);
+void drawLine(int N);
 void playComputer(char* board, const int rows, const int columns, string computerSymbol);
 void playUser(char* board, const int rows, const int columns, string userSymbol);
-//----------------UTILITIES------------------------------------------------------------------
-int howManyEmptySpotsInBoard(char* board, const int boardSize);
-void drawLine(int N);
+int  howManyEmptySpotsInBoard(char* board, const int boardSize);
 bool boardIsFull(char*board, const int rows, const int columns);
 bool completedRow(char* arr, int Row, int Column, string player);
 bool completedColumn(char* arr, int Row, int Column, string player);
 bool completedDiagonal(char* arr, int Row, int Column, string player);
-bool validInteger(int& i);
+bool validInteger(string input, int& i);
+// OTHER FUNCTIONS useful in testing
+void displayIthRow(char* arr, const int Row, const int Column, const int ithRow);
+void displayAllRow(char* arr, const int Row, const int Column);
+void displayAllColumnIndices(char* arr, const int Row, const int Column);
+void displayAllDiagonals(char* arr, const int Row, const int Column);
 
 
 
-
-bool rowCompleted(char* arr, int R, int C, string player, char Symbol);
-
-//----------------------------------------------------------------------------------------MAIN()
+//---------------------------------------------------------------------------------------- MAIN()
 
 
 
 int main(int argc, const char * argv[]) {
+    
     bool wantToPlay=true;
-    welcomeMessage();
+    cout << endl << "\t\t\t\t\t WELCOME TO TIC TAC TOE ! " <<endl<<endl;
+   
     while(wantToPlay){
         //These variables need to be updated every time a new game starts.
         srand (time(NULL) );
@@ -79,24 +73,127 @@ int main(int argc, const char * argv[]) {
             displayBoard(board, rows, columns);
             gameOn = !isPlayerWinner(board, rows, columns, playerTurn);
         }
+        cout << endl;
         cout << "\t GAME OVER " <<endl<<endl;
         wanToPlayMore(wantToPlay);
     }
-    goodByMessage();
+    
+    cout <<endl<<"\t\t\tTHANK YOU FOR PLAYING TIC TAC TOE" <<endl<<endl;
+    
     
     return 0;
 }
 
 
-//----------------------------------------------------------------------------------------FUNCTIONS (needs house keeping)
+
+//----------------------------------------------------------------------------------------FUNCTION DEFINITION
+
+
+
+
+void setGameVariables(string& userSymbol, string& computerSymbol, string& player , int& Row, int& Column){
+    string input;
+    int r;
+    int c;
+    cout << "Please Choose the size of your board : "<<endl;
+    //Validating the numbers of rows.
+    do{
+        cout << "\t\t\t> Enter Row: ";
+        getline(cin,input);
+        input.erase(remove(input.begin(),input.end(),' '),input.end()); //Remove white space from front and end
+    }while( ! (validInteger(input, r) && (3<=r&&r<=20)) );
+    Row = r;
+    //Validating the numbers of columns.
+    do{
+        cout << "\t\t\t> Enter Colums: ";
+        getline(cin,input);
+        input.erase(remove(input.begin(),input.end(),' '),input.end()); //Remove white space from front and end
+    }while( ! (validInteger(input, c) && (3<=c&&c<=20)) );
+    Column = c;
+    cout <<endl;
+    //Validating the symbol.
+    do{
+        cout << "\t\t\t> Pick a Symbol 'X' or 'O' : ";
+        cin >> userSymbol;
+        
+    }while(  !( userSymbol == "X" || userSymbol == "O") );
+    //Setting up the other player's symbol.
+    if(userSymbol == "X"){
+        computerSymbol = "O";
+    }else if(userSymbol == "O"){
+        computerSymbol = "X";
+    }
+    //Validating the player to start the game.
+    do{
+        cout << "\t\t\t> Who starts 'I' or 'Y': ";
+        cin >> player;
+    }while(  !( player == "Y" || player == "I") );
+    //Asking user to make a move.
+    cout << "\t\t\t> Pick a number from 1 to "<< Row*Column << ":" << endl;
+    cout <<endl;
+}
+//Creates the Tic Tac Toe 2D array dinamiclly by asking for the numbers of Rows and Colums
+void createGameBoard(char* & board, const int Row, const int Column){
+    board = new char[Row*Column];
+}
+//Displays an Array based on the specified Rows and Columns
+void displayBoard(char* arr, const int Row, const int Column){
+    int boardSize = Row*Column;
+    for (int i=0; i<boardSize; i++){
+        if (i==0 || i%Column == 0) {
+            drawLine(Column);
+            cout <<"\t\t\t|";
+        }
+        cout << setw(2);
+        if (arr[i]=='\0') {
+            cout << "   ";
+        }else{
+            cout <<arr[i]<<setw(2);
+        }
+        cout << "|";
+    }
+    drawLine(Column);
+    cout <<endl<<endl;
+}
+//We check if Player is winner if completed a row || Column || Diagonal (if any)
+bool isPlayerWinner(char* arr, int Row, int Column, string playerTurn){
+    string player;
+    if (playerTurn == "Y") {
+        player = "YOU";
+    }else{
+        player = "THE COMPUTER";
+    }
+    return (completedRow(arr,Row,Column,player)||
+            completedColumn(arr,Row,Column,player) ||
+            completedDiagonal(arr,Row,Column,player)||
+            boardIsFull(arr,Row,Column));
+}
+void wanToPlayMore(bool& wantToPlay){
+    string input;
+    do{
+        cout << "IF you want to continue playing enter 'Y' or 'N': ";
+        cin  >> input;
+    }while( ! (input[0] == 'Y' || input[0] =='N') );
+    
+    if (input == "Y") {
+        wantToPlay = true;
+    }else{
+        wantToPlay = false;
+    }
+}
+
+
+
+//----------------------------------------------------------------------Helper Functions
+
+
 
 bool boardIsFull(char*board, const int rows, const int columns){
     bool tied_game = true;
     int board_size = rows*columns;
     for (int i=0; i<board_size; i++) {
-        if(board[i] == '\0'){
+        if(board[i] == '\0')
             return false;
-        }
     }
     cout << " GAME TIED , No winners ... " <<endl;
     return tied_game;
@@ -184,16 +281,8 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
     //Make this move by board[index] = symbol.
     board[index] = userSymbol[0]; //Since we are storing one character instead of a string.
 }
- //We check if Player is winner if completed a row || Column || Diagonal (if any)
- bool isPlayerWinner(char* arr, int Row, int Column, string playerTurn){
-     string player;
-     if (playerTurn == "Y") {
-         player = "YOU";
-     }else{
-         player = "THE COMPUTER";
-     }
-     return (completedRow(arr,Row,Column,player) || completedColumn(arr,Row,Column,player) || completedDiagonal(arr,Row,Column,player));
- }
+
+
  bool completedRow(char* arr, int Row, int Column, string player){
      for (int i=1; i<=Row; i++) { //i is the ith Row example (first Row, Second, Third ....)
          int index=getStartingIndexOfRow(Row,Column,i);
@@ -204,14 +293,15 @@ void playUser(char* board, const int rows, const int columns, string userSymbol)
                  break;
              }
              if (l==Column-1){
-                 cout << "ROW Number : " << i << "completed by player "<< player <<endl;
+                 cout << "ROW Number " << i << " is completed by player "<< player <<endl;
                  return true; // wins a row;
              }
          }
      }
      return false;
  }
-bool completedColumn(char* arr, int Row, int Column, string player){
+
+ bool completedColumn(char* arr, int Row, int Column, string player){
     for (int j=0; j<Column; j++) {
         char prev = arr[j];
         for (int i=1; i<Row; i++) {
@@ -220,35 +310,31 @@ bool completedColumn(char* arr, int Row, int Column, string player){
             }
             if(i==Row-1){
                 //winner column
-                cout << "COLUMN number :" << j+1 << " : completed by "<< player << endl;
+                cout << "COLUMN number " << j+1 << " is completed by "<< player << endl;
                 return true;
             }
         }
         //if loop reached this point it
     }
     return false;
-}
+ }
 
-bool completedDiagonal(char* arr, int Row, int Column, string player){
-    if (MatrixIsnByn(Row, Column)) {
+ bool completedDiagonal(char* arr, int Row, int Column, string player){
+    if (Row==Column) {
         int c = Row; // c = Row = Column
-        
         char TopLeft_prev = arr[0];
         for(int i=1; i<c; i++){      //first Diagonal
-            if(TopLeft_prev == '\0' || arr[i*(c+1)] != TopLeft_prev){
+            if(TopLeft_prev == '\0' || arr[i*(c+1)] != TopLeft_prev)
                 break;
-            }
             if(i==c-1){
                 cout <<"First Diagonal completed by player "<< player <<endl;
                 return true;
             }
         }
-        
         char TopRight_prev = arr[c-1];
         for (int i=2; i<=c; i++){    //Second Diagonal
-            if(TopRight_prev == '\0' || arr[i*(c-1)]!=TopRight_prev){
+            if(TopRight_prev == '\0' || arr[i*(c-1)]!=TopRight_prev)
                 break;
-            }
             if(i==c){
                 cout <<"Second Diagonal completed by player "<< player <<endl;
                 return true;
@@ -258,71 +344,6 @@ bool completedDiagonal(char* arr, int Row, int Column, string player){
     return false;
 }
 
-
-//Simple Welcome message
-void welcomeMessage(){
-    cout << endl;
-    cout << "\t\t\t\t\t WELCOME TO TIC TAC TOE ! " <<endl<<endl;
-}
-void goodByMessage(){
-    cout << "THANK YOU FOR PLAYING TIC TAC TOE" <<endl;
-}
-void wanToPlayMore(bool& wantToPlay){
-    string input;
-    cout << "IF you want to continue playing enter Y/N: ";
-    cin  >> input;
-    cout << endl;
-    if (input == "Y") {
-        wantToPlay = true;
-    }else{
-        wantToPlay = false;
-    }
-}
-
-void setGameVariables(string& userSymbol, string& computerSymbol, string& player , int& Row, int& Column){
-    int input;
-    cout << "Please Choose the size of your board : "<<endl;
-    //Validating the numbers of rows.
-    do{
-        cout << "\t\t\t> Enter Row: ";
-    }while( ! (validInteger(input) && (2<=input&&input<=20)) );
-    Row = input;
-    //Validating the numbers of columns.
-    do{
-        cout << "\t\t\t> Enter Colums: ";
-    }while( ! (validInteger(input) && (2<=input&&input<=20)) );
-    Column = input;
-    cout <<endl;
-    //Validating the symbol.
-    do{
-        cout << "\t\t\t> Pick a Symbol 'X' or 'O' : ";
-        cin >> userSymbol;
-        
-    }while(  !( userSymbol == "X" || userSymbol == "O") );
-    //Setting up the other player's symbol.
-    if(userSymbol == "X"){
-        computerSymbol = "O";
-    }else if(userSymbol == "O"){
-        computerSymbol = "X";
-    }
-    //Validating the player to start the game.
-    do{
-        cout << "\t\t\t> Who starts 'I' or 'Y': ";
-        cin >> player;
-    }while(  !( player == "Y" || player == "I") );
-    //Asking user to make a move.
-    cout << "\t\t\t> Pick a number from 1 to "<< Row*Column << ":" << endl;
-    cout <<endl;
-}
-
-
-//Creates the Tic Tac Toe 2D array dinamiclly by asking for the numbers of Rows and Colums
-void createGameBoard(char* & board, const int Row, const int Column){
-    board = new char[Row*Column];
-}
-
-
-
 //Fills the TicTacToe board with random binaries 0 and 1 for testing X = 1 and O = 0.
 void fillBoard(char* arr, const int Row, const int Column){
     for (int i=0; i< Row*Column; i++) {
@@ -330,26 +351,6 @@ void fillBoard(char* arr, const int Row, const int Column){
         //arr[i] = round((double) rand() / (RAND_MAX));
         arr[i] = i+1; // ASCII code for white space
     }
-}
-
-//Displays an Array based on the specified Rows and Columns
-void displayBoard(char* arr, const int Row, const int Column){
-    int boardSize = Row*Column;
-    for (int i=0; i<boardSize; i++){
-        if (i==0 || i%Column == 0) {
-            drawLine(Column);
-            cout <<"\t\t\t|";
-        }
-        cout << setw(2);
-        if (arr[i]=='\0') {
-            cout << "   ";
-        }else{
-            cout <<arr[i]<<setw(2);
-        }
-        cout << "|";
-    }
-    drawLine(Column);
-    cout <<endl<<endl;
 }
 
 void drawLine(int N){
@@ -361,7 +362,6 @@ void drawLine(int N){
     cout<<endl;
 }
 
-
 //Returns the starting index of the ith Row (think of a 2D table with Rows and Columns) but stored in a linear array.
 //Returns -1 if failed
 int getStartingIndexOfRow(const int Row, const int Column, const int ithRow){
@@ -372,6 +372,16 @@ int getStartingIndexOfRow(const int Row, const int Column, const int ithRow){
     else
         return ( (ithRow-1) * Column);
 }
+
+bool validInteger(string input, int& i){
+    if(isdigit(input[0])){
+        i = stoi(input);
+        return true;
+    }else{
+        return false;
+    }
+}
+//-----------------------------------------------------------------------------------------Other Functions
 
 //Displays the ith row of a matrix stored in an array.
 void displayIthRow(char* arr, const int Row, const int Column, const int ithRow){
@@ -416,7 +426,7 @@ void displayAllColumnIndices(char* arr, const int Row, const int Column){
         cout <<endl;
     }
 }
-/*
+/* Explanation of how it works:
  How to get the array of diagonal: THERE IS A PATTERN
  First the Matrix needs to be N x N Matrix
  
@@ -438,12 +448,8 @@ void displayAllColumnIndices(char* arr, const int Row, const int Column){
  15 16 17 18 19
  20 21 22 23 24
  */
-bool MatrixIsnByn(const int Row, const int Column){
-    return (Row==Column);
-}
-
 void displayAllDiagonals(char* arr, const int Row, const int Column){
-    if (MatrixIsnByn(Row, Column)) {
+    if (Row==Column) {
         int c = Row; // c = Row = Column
         cout << "First Diagonal: " ;
         for(int i=0; i<c; i++)//first Diagonal
@@ -458,23 +464,5 @@ void displayAllDiagonals(char* arr, const int Row, const int Column){
 }
 
 
-bool validInteger(int& i){
-    string input;
-    getline(cin,input);                                             //Get the input as a string
-    input.erase(remove(input.begin(),input.end(),' '),input.end()); //Remove white space from front and end
-    if(isdigit(input[0])){
-        i = stoi(input);
-        return true;
-    }else{
-        return false;
-    }
-}
-
-
-void makeAmove(){
-
-
-
-}
 
 

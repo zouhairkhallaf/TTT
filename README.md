@@ -1,4 +1,4 @@
-# TTT (Tic Tac Toe)
+# C++ Tic Tac Toe Game
 
 This is an implementation of the TTT game using only ONE array as the data structure.
 
